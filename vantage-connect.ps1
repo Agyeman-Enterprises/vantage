@@ -3,7 +3,7 @@
 # Run from PowerShell: .\vantage-connect.ps1
 
 $configPath = "$env:APPDATA\Claude\claude_desktop_config.json"
-$mcpUrl = "http://localhost:3100/mcp"
+$mcpUrl = "https://vantage.agyemanenterprises.com/mcp"
 
 # Load existing config or start fresh
 if (Test-Path $configPath) {
@@ -33,7 +33,8 @@ Write-Host "Vantage connected as MCP server." -ForegroundColor Green
 Write-Host "  Config: $configPath"
 Write-Host "  URL:    $mcpUrl"
 Write-Host ""
-Write-Host "Make sure Vantage is running first:" -ForegroundColor Yellow
-Write-Host "  cd C:\dev\vantage && node dist/index.js"
+Write-Host "Vantage runs on Hetzner at vantage.agyemanenterprises.com" -ForegroundColor Yellow
+Write-Host "Restart Claude Code to pick up the new MCP server." -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Then restart Claude Code to pick up the new MCP server." -ForegroundColor Cyan
+Write-Host "Open dashboard:" -ForegroundColor White
+Write-Host "  https://vantage.agyemanenterprises.com"

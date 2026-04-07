@@ -1,0 +1,25 @@
+[Unit]
+Description=Vantage — Outcome Verification Oracle
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/vantage
+ExecStart=/usr/bin/node /opt/vantage/dist/index.js
+Restart=always
+RestartSec=5
+
+Environment=PORT=4021
+Environment=NODE_ENV=production
+Environment=PROBE_IMAP_HOST=mail.agyemanenterprises.com
+Environment=PROBE_IMAP_PORT=993
+Environment=PROBE_IMAP_USER=vantage-probe@agyemanenterprises.com
+Environment=VANTAGE_KEY_DIR=/opt/vantage/.keys
+
+# Set PROBE_IMAP_PASS in /opt/vantage/.env via:
+#   echo 'PROBE_IMAP_PASS=Vantage2026!probe#' >> /opt/vantage/.env
+EnvironmentFile=-/opt/vantage/.env
+
+[Install]
+WantedBy=multi-user.target
