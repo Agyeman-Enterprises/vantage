@@ -6,6 +6,7 @@ import { verifyOtpDelivery, verifyOtpSchema } from "./tools/verify-otp.js";
 import { verifySmtpDns, verifySmtpDnsSchema } from "./tools/verify-smtp-dns.js";
 import { verifySupabaseAuth, verifySupabaseAuthSchema } from "./tools/verify-supabase-auth.js";
 import { verifyAgentTask, verifyAgentTaskSchema } from "./tools/verify-agent-task.js";
+import { attestAction, attestActionSchema } from "./tools/attest-action.js";
 import { dashboardHtml } from "./dashboard.js";
 import { landingHtml } from "./landing.js";
 
@@ -62,6 +63,19 @@ server.tool(
   verifyAgentTaskSchema.shape,
   async (input) => {
     const result = await verifyAgentTask(input as Parameters<typeof verifyAgentTask>[0]);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// ── Tool: attest_action (Aitonoma execution attestation) ──────────────────
+server.tool(
+  "attest_action",
+  "Signs an Aitonoma action execution with Vantage's Ed25519 key, producing a cryptographic attestation that an independent system acknowledged the execution. Optionally POSTs the bundle to Aitonoma's webhook for audit log storage.",
+  attestActionSchema.shape,
+  async (input) => {
+    const result = await attestAction(input as Parameters<typeof attestAction>[0]);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
