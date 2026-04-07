@@ -1,5 +1,5 @@
 import { createSign, createVerify, generateKeyPairSync } from "node:crypto";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 const KEY_DIR = process.env.VANTAGE_KEY_DIR ?? join(process.cwd(), ".keys");
@@ -8,6 +8,7 @@ const PUB_PATH = join(KEY_DIR, "vantage.pub");
 
 function ensureKeys() {
   if (existsSync(PRIV_PATH) && existsSync(PUB_PATH)) return;
+  mkdirSync(KEY_DIR, { recursive: true });
   const { privateKey, publicKey } = generateKeyPairSync("ed25519");
   writeFileSync(
     PRIV_PATH,

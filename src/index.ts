@@ -6,6 +6,7 @@ import { verifyOtpDelivery, verifyOtpSchema } from "./tools/verify-otp.js";
 import { verifySmtpDns, verifySmtpDnsSchema } from "./tools/verify-smtp-dns.js";
 import { verifySupabaseAuth, verifySupabaseAuthSchema } from "./tools/verify-supabase-auth.js";
 import { verifyAgentTask, verifyAgentTaskSchema } from "./tools/verify-agent-task.js";
+import { dashboardHtml } from "./dashboard.js";
 
 const PORT = parseInt(process.env.PORT ?? "3100");
 
@@ -86,7 +87,29 @@ const httpServer = createServer(async (req: IncomingMessage, res: ServerResponse
     return;
   }
 
-  if (req.url === "/mcp" || req.url === "/") {
+  // Dashboard
+  if (req.url === "/" && req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.end(dashboardHtml(publicKeyPem()));
+    return;
+  }
+
+  // REST endpoint for dashboard check button
+  if (req.url === "/api/check" && req.method === "POST") {
+    try {
+      const body = await readBody(req);
+      const input = verifyAgentTaskSchema.parse(JSON.parse(body.toString()));
+      const result = await verifyAgentTask(input);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(result));
+    } catch (e) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: String(e) }));
+    }
+    return;
+  }
+
+  if (req.url === "/mcp") {
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined, // stateless
     });
