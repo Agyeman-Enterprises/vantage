@@ -1,0 +1,71 @@
+VANTAGE — GATE 7: OUTCOME VERIFICATION ORACLE BEHAVIORAL TEST
+=============================================================
+Vantage is an MCP server that proves AI agent tasks produced correct outcomes.
+It does not log actions — it verifies results cryptographically.
+Verification must center on the PROBE → RECEIVE → ATTEST flow.
+
+This file is read by RELEASE_GATE.txt Gate 7.
+Every check below must PASS before Vantage can be called done.
+
+===================================================================
+SECTION A: SERVER HEALTH — HTTP ENDPOINTS
+===================================================================
+
+  [ ] /health → GET 200 {"status":"ok","service":"vantage"}
+  [ ] /mcp → POST MCP handshake returns server info (name:"vantage", version:"1.0.0")
+  [ ] /mcp → POST tools/list returns all 4 tools: verify_otp_delivery, verify_smtp_dns, verify_supabase_auth, get_public_key
+  [ ] /unknown → GET 404 Not found
+  [ ] Server starts: node dist/index.js → "Vantage MCP server running on port 3100"
+  [ ] Keys auto-generated: .keys/vantage.key and .keys/vantage.pub created on first run
+
+===================================================================
+SECTION B: VERIFY_OTP_DELIVERY TOOL
+===================================================================
+
+  [ ] Tool listed in MCP tool discovery response
+  [ ] Calling tool with a real Supabase project URL triggers OTP send (HTTP 200 from Supabase)
+  [ ] Email arrives in vantage-probe@agyemanenterprises.com within 60s
+  [ ] Response contains: verified=true, code_received=true, delivery_ms (number), magic_link_absent=true
+  [ ] Response signature validates against .keys/vantage.pub using Ed25519
+
+===================================================================
+SECTION C: VERIFY_SMTP_DNS TOOL
+===================================================================
+
+  [ ] Tool listed in MCP tool discovery response
+  [ ] verify_smtp_dns({domain:"telzyn.co"}) → verified=true, mx_ok=true, spf_ok=true, dkim_ok=true
+  [ ] verify_smtp_dns({domain:"example.com"}) → verified=false (wrong MX)
+  [ ] Response is signed and timestamp is present
+
+===================================================================
+SECTION D: VERIFY_SUPABASE_AUTH TOOL
+===================================================================
+
+  [ ] verify_supabase_auth with betanota project URL → auth_reachable=true
+  [ ] otp_send_accepted=true when SMTP is configured
+  [ ] Returns signed attestation
+
+===================================================================
+SECTION E: GET_PUBLIC_KEY TOOL
+===================================================================
+
+  [ ] Returns PEM-formatted Ed25519 public key
+  [ ] Key can be used to verify all attestation signatures from other tools
+
+===================================================================
+SECTION F: THE MANDATORY PROBE TEST
+===================================================================
+
+  [ ] Create a test Supabase OTP request to vantage-probe@agyemanenterprises.com
+  [ ] Verify email arrives in Mailcow probe mailbox (webmail: mail.agyemanenterprises.com)
+  [ ] Vantage detects arrival and returns delivery_ms
+  [ ] Run again — second call also succeeds (probe mailbox cleans up after each read)
+
+===================================================================
+WHAT CLAUDE IS NOT ALLOWED TO SUBSTITUTE FOR THIS TEST
+===================================================================
+
+  - "build succeeds" → NOT A PRODUCT TEST
+  - "API returns 200 at /health" → NOT A PRODUCT TEST
+  - "TypeScript passes" → NOT A PRODUCT TEST
+  - Only end-to-end probe delivery with a real email and real attestation counts as PASS.
