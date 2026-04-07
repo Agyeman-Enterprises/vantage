@@ -7,6 +7,7 @@ import { verifySmtpDns, verifySmtpDnsSchema } from "./tools/verify-smtp-dns.js";
 import { verifySupabaseAuth, verifySupabaseAuthSchema } from "./tools/verify-supabase-auth.js";
 import { verifyAgentTask, verifyAgentTaskSchema } from "./tools/verify-agent-task.js";
 import { dashboardHtml } from "./dashboard.js";
+import { landingHtml } from "./landing.js";
 
 const PORT = parseInt(process.env.PORT ?? "3100");
 
@@ -87,8 +88,15 @@ const httpServer = createServer(async (req: IncomingMessage, res: ServerResponse
     return;
   }
 
-  // Dashboard
+  // Landing page
   if (req.url === "/" && req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.end(landingHtml());
+    return;
+  }
+
+  // Dashboard
+  if (req.url === "/dashboard" && req.method === "GET") {
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     res.end(dashboardHtml(publicKeyPem()));
     return;
