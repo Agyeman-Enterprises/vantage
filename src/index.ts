@@ -5,6 +5,7 @@ import { publicKeyPem } from "./lib/signer.js";
 import { verifyOtpDelivery, verifyOtpSchema } from "./tools/verify-otp.js";
 import { verifySmtpDns, verifySmtpDnsSchema } from "./tools/verify-smtp-dns.js";
 import { verifySupabaseAuth, verifySupabaseAuthSchema } from "./tools/verify-supabase-auth.js";
+import { verifyAgentTask, verifyAgentTaskSchema } from "./tools/verify-agent-task.js";
 
 const PORT = parseInt(process.env.PORT ?? "3100");
 
@@ -46,6 +47,19 @@ server.tool(
   verifySupabaseAuthSchema.shape,
   async (input) => {
     const result = await verifySupabaseAuth(input as Parameters<typeof verifySupabaseAuth>[0]);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// ── Tool: verify_agent_task (Aitonoma integration) ────────────────────────
+server.tool(
+  "verify_agent_task",
+  "Aitonoma integration: runs a bundle of outcome checks for a specific agent task and returns a single signed attestation. Optionally POSTs the bundle back to an Aitonoma callback URL with HMAC signature.",
+  verifyAgentTaskSchema.shape,
+  async (input) => {
+    const result = await verifyAgentTask(input as Parameters<typeof verifyAgentTask>[0]);
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
