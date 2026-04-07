@@ -1,5 +1,7 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
+# Override NODE_ENV so devDependencies (tsc, tsx) are installed
+ENV NODE_ENV=development
 COPY package*.json ./
 RUN npm ci
 COPY tsconfig.json ./
