@@ -1,4 +1,4 @@
-import { createSign, createVerify, generateKeyPairSync } from "node:crypto";
+import { sign as cryptoSign, verify as cryptoVerify, generateKeyPairSync } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
@@ -24,17 +24,15 @@ function ensureKeys() {
 export function sign(payload: object): string {
   ensureKeys();
   const priv = readFileSync(PRIV_PATH, "utf8");
-  const signer = createSign("SHA256");
-  signer.update(JSON.stringify(payload));
-  return signer.sign(priv, "base64");
+  const data = Buffer.from(JSON.stringify(payload));
+  return cryptoSign(null, data, priv).toString("base64");
 }
 
 export function verify(payload: object, signature: string): boolean {
   ensureKeys();
   const pub = readFileSync(PUB_PATH, "utf8");
-  const verifier = createVerify("SHA256");
-  verifier.update(JSON.stringify(payload));
-  return verifier.verify(pub, signature, "base64");
+  const data = Buffer.from(JSON.stringify(payload));
+  return cryptoVerify(null, data, pub, Buffer.from(signature, "base64"));
 }
 
 export function publicKeyPem(): string {
