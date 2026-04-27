@@ -9,3 +9,6 @@ dist/
 .claude/OO_PENDING.json
 .claude/OO_VIOLATION.json
 .claude/VIOLATIONS.log
+
+.keys/
+dist/
